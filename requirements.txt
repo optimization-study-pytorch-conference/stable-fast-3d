@@ -1,13 +1,13 @@
-einops==0.7.0
-jaxtyping==0.2.31
-omegaconf==2.3.0
-transformers==4.42.3
-open_clip_torch==2.24.0
-trimesh==4.4.1
-numpy==1.26.4
-huggingface-hub==0.23.4
-rembg[gpu]==2.0.57; sys_platform != 'darwin'
-rembg==2.0.57; sys_platform == 'darwin'
+einops
+jaxtyping
+omegaconf
+transformers
+open_clip_torch
+trimesh
+numpy
+huggingface-hub
+rembg[gpu]; sys_platform != 'darwin'
+rembg; sys_platform == 'darwin'
 git+https://github.com/vork/PyNanoInstantMeshes.git
-gpytoolbox==0.2.0
+gpytoolbox
 ./texture_baker/
