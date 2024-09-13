@@ -4,7 +4,7 @@ import torch
 from diffusers.models.attention_processor import AttnProcessor2_0
 from huggingface_hub import login
 from models import StableT2I3D
-from utils import benchmark, flush, init_pipe_models, prompts, warmup
+from utils import benchmark_run, flush, init_models, get_prompts, warmup_model
 
 login(token=os.getenv("HF_TOKEN_PYTORCH"))
 
@@ -15,7 +15,7 @@ config = {
 
 flush()
 
-models_dict = init_pipe_models(config)
+models_dict = init_models(config)
 
 models_dict["t2i_model"].unet.set_attn_processor(AttnProcessor2_0())
 
@@ -26,11 +26,11 @@ model = StableT2I3D(
     device=config["device"],
 )
 
-model = warmup(model=model, warmup_iter=10, warmup_prompt="Warm-up model")
+model = warmup_model(model=model, warmup_iter=10, warmup_prompt="Warm-up model")
 
-benchmark(
+benchmark_run(
     model=model,
-    prompt_list=prompts,
+    prompt_list=get_prompts(),
     run_name="BF16-SDPA",
     config=config,
     save_file=True,

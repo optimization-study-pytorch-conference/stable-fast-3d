@@ -10,7 +10,7 @@ from torchao.quantization import (
     int8_dynamic_activation_int8_semi_sparse_weight,
 )
 from torchao.sparsity import sparsify_
-from utils import benchmark, flush, init_pipe_models, prompts, warmup
+from utils import benchmark_run, flush, init_models, get_prompts, warmup_model
 
 login(token=os.getenv("HF_TOKEN_PYTORCH"))
 
@@ -21,7 +21,7 @@ config = {
 
 flush()
 
-models_dict = init_pipe_models(config)
+models_dict = init_models(config)
 
 # Quantize
 models_dict["t2i_model"].unet = autoquant(
@@ -65,11 +65,11 @@ model = StableT2I3DModel(
     device=config["device"],
 )
 
-model = warmup(model=model, warmup_iter=10, warmup_prompt="Warm-up model")
+model = warmup_model(model=model, warmup_iter=10, warmup_prompt="Warm-up model")
 
-benchmark(
+benchmark_run(
     model=model,
-    prompt_list=prompts,
+    prompt_list=get_prompts(),
     run_name="BF16-AutoQuant-Int4-SDPA-Compile-Fuse-Sparsify",
     config=config,
     save_file=True,

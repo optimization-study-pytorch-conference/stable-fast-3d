@@ -4,9 +4,6 @@ import rembg
 
 from sf3d.utils import remove_background, resize_foreground
 
-rembg_session = rembg.new_session()
-
-
 def handle_image(image, rembg_session):
     image = remove_background(image, rembg_session)
     image = resize_foreground(image, 0.85)

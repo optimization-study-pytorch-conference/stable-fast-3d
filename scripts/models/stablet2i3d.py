@@ -1,6 +1,7 @@
 import os
 
 import torch
+import rembg
 from utils import handle_image
 
 
@@ -18,6 +19,7 @@ class StableT2I3D(torch.nn.Module):
         self.i_3d_model = i_3d_model
         self.dtype = dtype
         self.device = device
+        self.rembg_session = rembg.new_session()
 
     def generate(self, prompt):
         with torch.no_grad():
@@ -38,7 +40,7 @@ class StableT2I3D(torch.nn.Module):
                 end_bg_remove = torch.cuda.Event(enable_timing=True)
 
                 start_bg_remove.record()
-                bg_removed_image = handle_image(image)
+                bg_removed_image = handle_image(image, self.rembg_session)
                 end_bg_remove.record()
 
                 torch.cuda.synchronize()

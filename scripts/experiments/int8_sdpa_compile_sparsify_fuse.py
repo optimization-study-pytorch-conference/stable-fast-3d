@@ -8,7 +8,7 @@ from torchao.quantization import (
     quantize_,
 )
 from torchao.sparsity import sparsify_
-from utils import benchmark, flush, init_pipe_models, prompts, warmup
+from utils import benchmark_run, flush, init_models, get_prompts, warmup_model
 
 config = {
     "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
@@ -21,7 +21,7 @@ login(token=os.getenv("HF_TOKEN_PYTORCH"))
 
 flush()
 
-models_dict = init_pipe_models(config)
+models_dict = init_models(config)
 
 # Quantize
 models_dict["t2i_model"].unet = quantize_(
@@ -62,11 +62,11 @@ model = StableT2I3DModel(
     device=config["device"],
 )
 
-model = warmup(model=model, warmup_iter=10, warmup_prompt="Warm-up model")
+model = warmup_model(model=model, warmup_iter=10, warmup_prompt="Warm-up model")
 
-benchmark(
+benchmark_run(
     model=model,
-    prompt_list=prompts,
+    prompt_list=get_prompts(),
     run_name="int8-SDPA-Compile-Sparsify-FuseQKV",
     config=config,
     save_file=True,
