@@ -3,7 +3,6 @@ import os
 import torch
 import wandb
 from tqdm.autonotebook import tqdm
-from utils import prompts
 
 
 def benchmark_run(model, prompts_list, config, save_file=True):
@@ -27,7 +26,7 @@ def benchmark_run(model, prompts_list, config, save_file=True):
         ]
     )
 
-    for idx, prompt in tqdm(enumerate(prompts_list), total=len(prompts)):
+    for idx, prompt in tqdm(enumerate(prompts_list), total=len(prompts_list)):
 
         torch.cuda.synchronize()
 
