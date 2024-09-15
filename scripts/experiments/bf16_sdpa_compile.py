@@ -22,9 +22,6 @@ torch._inductor.config.coordinate_descent_tuning = True
 torch._inductor.config.epilogue_fusion = False
 torch._inductor.config.coordinate_descent_check_all_directions = True
 
-models_dict["t2i_model"].transformer.to(memory_format=torch.channels_last)
-models_dict["t2i_model"].vae.decode.to(memory_format=torch.channels_last)
-
 models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
 
 models_dict["t2i_model"].transformer = torch.compile(
