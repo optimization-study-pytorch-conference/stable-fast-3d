@@ -17,16 +17,24 @@ flush()
 
 models_dict = init_models(config)
 
-models_dict["t2i_model"].unet.set_attn_processor(AttnProcessor2_0())
+torch._inductor.config.conv_1x1_as_mm = True
+torch._inductor.config.coordinate_descent_tuning = True
+torch._inductor.config.epilogue_fusion = False
+torch._inductor.config.coordinate_descent_check_all_directions = True
 
-models_dict["t2i_model"].unet = torch.compile(
-    models_dict["t2i_model"].unet, mode="max-autotune", backend="inductor"
+models_dict["t2i_model"].transformer.to(memory_format=torch.channels_last)
+models_dict["t2i_model"].vae.decode.to(memory_format=torch.channels_last)
+
+models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
+
+models_dict["t2i_model"].transformer = torch.compile(
+    models_dict["t2i_model"].transformer, mode="max-autotune", backend="inductor", fullgraph=True
 )
-models_dict["t2i_model"].vae = torch.compile(
-    models_dict["t2i_model"].vae, mode="max-autotune", backend="inductor"
+models_dict["t2i_model"].vae.decode = torch.compile(
+    models_dict["t2i_model"].vae.decode, mode="max-autotune", backend="inductor", fullgraph=True
 )
 models_dict["i_3d__model"] = torch.compile(
-    models_dict["t2i_model"], mode="max-autotune", backend="inductor"
+    models_dict["i_3d_model"], mode="max-autotune", backend="inductor", fullgraph=True
 )
 
 

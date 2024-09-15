@@ -4,7 +4,6 @@ import torch
 import rembg
 from utils import handle_image
 
-
 class StableT2I3D(torch.nn.Module):
     def __init__(
         self,
@@ -20,6 +19,9 @@ class StableT2I3D(torch.nn.Module):
         self.dtype = dtype
         self.device = device
         self.rembg_session = rembg.new_session()
+
+        self.t2i_pipe.transformer.to(memory_format=torch.channels_last)
+        self.t2i_pipe.vae.to(memory_format=torch.channels_last)
 
     def generate(self, prompt):
         with torch.no_grad():

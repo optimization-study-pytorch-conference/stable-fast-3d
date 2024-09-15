@@ -19,13 +19,13 @@ flush()
 
 models_dict = init_models(config)
 
-models_dict["t2i_model"].unet.set_attn_processor(AttnProcessor2_0())
+models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
 
-models_dict["t2i_model"].unet = sparsify_(
-    models_dict["t2i_model"].unet, int8_dynamic_activation_int8_semi_sparse_weight()
+models_dict["t2i_model"].transformer = sparsify_(
+    models_dict["t2i_model"].transformer, int8_dynamic_activation_int8_semi_sparse_weight()
 )
-models_dict["t2i_model"].vae = sparsify_(
-    models_dict["t2i_model"].vae, int8_dynamic_activation_int8_semi_sparse_weight()
+models_dict["t2i_model"].vae.decode = sparsify_(
+    models_dict["t2i_model"].vae.decode, int8_dynamic_activation_int8_semi_sparse_weight()
 )
 models_dict["i_3d_model"] = sparsify_(
     models_dict["i_3d_model"], int8_dynamic_activation_int8_semi_sparse_weight()

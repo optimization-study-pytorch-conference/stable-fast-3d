@@ -17,7 +17,7 @@ flush()
 
 models_dict = init_models(config)
 
-models_dict["t2i_model"].unet.set_attn_processor(AttnProcessor2_0())
+models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
 
 model = StableT2I3D(
     t2i_model=models_dict["t2i_model"],

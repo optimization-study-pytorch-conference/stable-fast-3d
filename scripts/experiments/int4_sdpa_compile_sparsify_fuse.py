@@ -2,7 +2,7 @@ import os
 
 import torch
 from huggingface_hub import login
-from models import StableT2I3DModel
+from models import StableT2I3D
 from torchao.quantization import (
     int4_weight_only,
     int8_dynamic_activation_int8_semi_sparse_weight,
@@ -22,12 +22,17 @@ flush()
 
 models_dict = init_models(config)
 
+torch._inductor.config.conv_1x1_as_mm = True
+torch._inductor.config.coordinate_descent_tuning = True
+torch._inductor.config.epilogue_fusion = False
+torch._inductor.config.coordinate_descent_check_all_directions = True
+
 # Quantize
-models_dict["t2i_model"].unet = quantize_(
-    models_dict["t2i_model"].unet, int4_weight_only(), device="cuda"
+models_dict["t2i_model"].transformer = quantize_(
+    models_dict["t2i_model"].transformer, int4_weight_only(), device="cuda"
 )
-models_dict["t2i_model"].vae = quantize_(
-    models_dict["t2i_model"].vae, int4_weight_only(), device="cuda"
+models_dict["t2i_model"].vae.decode = quantize_(
+    models_dict["t2i_model"].vae.decode, int4_weight_only(), device="cuda"
 )
 models_dict["i_3d_model"] = quantize_(
     models_dict["i_3d_model"], int4_weight_only(), device="cuda"
@@ -40,24 +45,24 @@ models_dict["t2i_model"].fuse_qkv_projections()
 models_dict["t2i_model"].fuse_qkv_projections()
 
 # Compile and Sparsify
-models_dict["t2i_model"].unet = sparsify_(
+models_dict["t2i_model"].transformer = sparsify_(
     torch.compile(
-        models_dict["t2i_model"].unet, mode="max-autotune", backend="inductor"
+        models_dict["t2i_model"].transformer, mode="max-autotune", backend="inductor", fullgraph=True
     ),
     int8_dynamic_activation_int8_semi_sparse_weight(),
 )
-models_dict["t2i_model"].vae = sparsify_(
+models_dict["t2i_model"].vae.decode = sparsify_(
     torch.compile(
-        models_dict["t2i_model"].vae, mode="max-autotune", backend="inductor"
+        models_dict["t2i_model"].vae.decode, mode="max-autotune", backend="inductor", fullgraph=True
     ),
     int8_dynamic_activation_int8_semi_sparse_weight(),
 )
 models_dict["i_3d_model"] = sparsify_(
-    torch.compile(models_dict["i_3d_model"], mode="max-autotune", backend="inductor"),
+    torch.compile(models_dict["i_3d_model"], mode="max-autotune", backend="inductor", fullgraph=True),
     int8_dynamic_activation_int8_semi_sparse_weight(),
 )
 
-model = StableT2I3DModel(
+model = StableT2I3D(
     t2i_model=models_dict["t2i_model"],
     i_3d_model=models_dict["i_3d_model"],
     dtype=config["dtype"],

@@ -3,7 +3,7 @@ import os
 import torch
 from diffusers.models.attention_processor import AttnProcessor2_0
 from huggingface_hub import login
-from models import StableT2I3DModel
+from models import StableT2I3D
 from torchao import autoquant
 from torchao.quantization import int8_dynamic_activation_int8_semi_sparse_weight
 from torchao.sparsity import sparsify_
@@ -20,37 +20,42 @@ flush()
 
 models_dict = init_models(config)
 
+torch._inductor.config.conv_1x1_as_mm = True
+torch._inductor.config.coordinate_descent_tuning = True
+torch._inductor.config.epilogue_fusion = False
+torch._inductor.config.coordinate_descent_check_all_directions = True
+
 # Quantize
-models_dict["t2i_model"].unet = autoquant(
+models_dict["t2i_model"].transformer = autoquant(
     torch.compile(
-        models_dict["t2i_model"].unet, mode="max-autotune", backend="inductor"
+        models_dict["t2i_model"].transformer, mode="max-autotune", backend="inductor", fullgraph=True
     )
 )
-models_dict["t2i_model"].vae = autoquant(
-    torch.compile(models_dict["t2i_model"].vae, mode="max-autotune", backend="inductor")
+models_dict["t2i_model"].vae.decode = autoquant(
+    torch.compile(models_dict["t2i_model"].vae.decode, mode="max-autotune", backend="inductor", fullgraph=True)
 )
 models_dict["i_3d_model"] = autoquant(
-    torch.compile(models_dict["i_3d_model"], mode="max-autotune", backend="inductor")
+    torch.compile(models_dict["i_3d_model"], mode="max-autotune", backend="inductor", fullgraph=True)
 )
 
 # SDPA
-models_dict["t2i_model"].unet.set_attn_processor(AttnProcessor2_0())
+models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
 
 # Fuse QKV
 models_dict["t2i_model"].fuse_qkv_projections()
 
 # Compile and Sparsify
-models_dict["t2i_model"].unet = sparsify_(
-    models_dict["t2i_model"].unet, int8_dynamic_activation_int8_semi_sparse_weight()
+models_dict["t2i_model"].transformer = sparsify_(
+    models_dict["t2i_model"].transformer, int8_dynamic_activation_int8_semi_sparse_weight()
 )
-models_dict["t2i_model"].vae = sparsify_(
-    models_dict["t2i_model"].vae, int8_dynamic_activation_int8_semi_sparse_weight()
+models_dict["t2i_model"].vae.decode = sparsify_(
+    models_dict["t2i_model"].vae.decode, int8_dynamic_activation_int8_semi_sparse_weight()
 )
 models_dict["i_3d_model"] = sparsify_(
     models_dict["i_3d_model"], int8_dynamic_activation_int8_semi_sparse_weight()
 )
 
-model = StableT2I3DModel(
+model = StableT2I3D(
     t2i_model=models_dict["t2i_model"],
     i_3d_model=models_dict["i_3d_model"],
     dtype=config["dtype"],
