@@ -10,3 +10,5 @@ def warmup_model(model, warmup_iter, warmup_prompt):
         _ = model.generate(warmup_prompt)
 
     print("Warm-up complete")
+
+    return model
