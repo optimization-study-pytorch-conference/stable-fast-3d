@@ -5,11 +5,11 @@ import wandb
 from tqdm.autonotebook import tqdm
 
 
-def benchmark_run(model, prompts_list, config, save_file=True):
+def benchmark_run(model, prompt_list, run_name, config, save_file=True):
     run = wandb.init(
         project="PyTorch-Conference-3D-Optimization",
         entity="suvadityamuk",
-        name=config["run_name"],
+        name=run_name,
         save_code=True,
         config=config,
     )
@@ -26,7 +26,7 @@ def benchmark_run(model, prompts_list, config, save_file=True):
         ]
     )
 
-    for idx, prompt in tqdm(enumerate(prompts_list), total=len(prompts_list)):
+    for idx, prompt in tqdm(enumerate(prompt_list), total=len(prompt_list)):
 
         torch.cuda.synchronize()
 
@@ -46,7 +46,7 @@ def benchmark_run(model, prompts_list, config, save_file=True):
             if not os.path.exists(save_path_dir):
                 os.makedirs(save_path_dir)
             save_path = os.path.join(save_path_dir, "mesh.glb")
-            model.save_result(mesh, glob_dict, save_path)
+            model.save_result(mesh, save_path)
 
         result_table.add_data(
             prompt,

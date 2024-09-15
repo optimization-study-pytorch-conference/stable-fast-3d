@@ -11,3 +11,10 @@ rembg; sys_platform == 'darwin'
 git+https://github.com/vork/PyNanoInstantMeshes.git
 gpytoolbox
 ./texture_baker/
+./scripts/
+wandb
+sentencepiece
+diffusers
+accelerate
+jaxlib==0.4.30
+.
