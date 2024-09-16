@@ -19,8 +19,6 @@ activate_inductor_opts()
 models_dict = init_models(config)
 
 models_dict["t2i_model"].transformer.enable_forward_chunking()
-models_dict["t2i_model"].transformer.enable_xformers_memory_efficient_attention()
-models_dict["t2i_model"].transformer.fuse_qkv_projections()
 
 models_dict["t2i_model"].transformer = torch.compile(
     models_dict["t2i_model"].transformer, mode="max-autotune", backend="inductor", fullgraph=True
@@ -44,7 +42,7 @@ model = warmup_model(model=model, warmup_iter=3, warmup_prompt="Warm-up model")
 benchmark_run(
     model=model,
     prompt_list=get_prompts(),
-    run_name="BF16-FChunk-XFormers-Compile-Fuse",
+    run_name="BF16-FChunk-XFormers-Compile",
     config=config,
     save_file=True,
 )

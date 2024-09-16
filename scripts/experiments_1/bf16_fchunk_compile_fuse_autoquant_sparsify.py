@@ -5,6 +5,7 @@ from huggingface_hub import login
 from models import StableT2I3D
 from utils import benchmark_run, flush, init_models, get_prompts, warmup_model, activate_inductor_opts, set_random_seed
 from torchao import autoquant
+from torchao.sparsity import sparsify_, int8_dynamic_activation_int8_semi_sparse_weight
 
 login(token=os.getenv("HF_TOKEN_PYTORCH"))
 
@@ -20,7 +21,6 @@ activate_inductor_opts()
 models_dict = init_models(config)
 
 models_dict["t2i_model"].transformer.enable_forward_chunking()
-models_dict["t2i_model"].transformer.enable_xformers_memory_efficient_attention()
 models_dict["t2i_model"].transformer.fuse_qkv_projections()
 
 models_dict["t2i_model"].transformer = autoquant(
@@ -33,6 +33,20 @@ models_dict["t2i_model"].vae = autoquant(
 )
 models_dict["i_3d_model"] = autoquant(
     torch.compile(models_dict["i_3d_model"], mode="max-autotune", backend="inductor", fullgraph=True)
+)
+
+# Compile and Sparsify
+models_dict["t2i_model"].transformer = sparsify_(
+    models_dict["t2i_model"].transformer,
+    int8_dynamic_activation_int8_semi_sparse_weight(),
+)
+models_dict["t2i_model"].vae = sparsify_(
+    models_dict["t2i_model"].vae,
+    int8_dynamic_activation_int8_semi_sparse_weight(),
+)
+models_dict["i_3d_model"] = sparsify_(
+    models_dict["i_3d_model"],
+    int8_dynamic_activation_int8_semi_sparse_weight(),
 )
 
 model = StableT2I3D(

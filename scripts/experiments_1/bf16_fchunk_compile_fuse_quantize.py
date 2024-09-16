@@ -23,18 +23,7 @@ activate_inductor_opts()
 models_dict = init_models(config)
 
 models_dict["t2i_model"].transformer.enable_forward_chunking()
-models_dict["t2i_model"].transformer.enable_xformers_memory_efficient_attention()
 models_dict["t2i_model"].transformer.fuse_qkv_projections()
-
-models_dict["t2i_model"].transformer = quantize_(
-    models_dict["t2i_model"].transformer, int8_weight_only(), device="cuda"
-)
-models_dict["t2i_model"].vae = quantize_(
-    models_dict["t2i_model"].vae, int8_weight_only(), device="cuda"
-)
-models_dict["i_3d_model"] = quantize_(
-    models_dict["i_3d_model"], int8_weight_only(), device="cuda"
-)
 
 models_dict["t2i_model"].transformer = torch.compile(
     models_dict["t2i_model"].transformer, mode="max-autotune", backend="inductor", fullgraph=True
@@ -44,6 +33,16 @@ models_dict["t2i_model"].vae = torch.compile(
 )
 models_dict["i_3d__model"] = torch.compile(
     models_dict["i_3d_model"], mode="max-autotune", backend="inductor", fullgraph=True
+)
+
+models_dict["t2i_model"].transformer = quantize_(
+    models_dict["t2i_model"].transformer, int8_weight_only(), device="cuda"
+)
+models_dict["t2i_model"].vae = quantize_(
+    models_dict["t2i_model"].vae, int8_weight_only(), device="cuda"
+)
+models_dict["i_3d_model"] = quantize_(
+    models_dict["i_3d_model"], int8_weight_only(), device="cuda"
 )
 
 model = StableT2I3D(
