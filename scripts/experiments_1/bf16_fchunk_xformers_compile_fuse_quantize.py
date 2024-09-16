@@ -58,7 +58,7 @@ model = warmup_model(model=model, warmup_iter=3, warmup_prompt="Warm-up model")
 benchmark_run(
     model=model,
     prompt_list=get_prompts(),
-    run_name="BF16-SDPA-XFormers-Compile-Fuse-Quantize",
+    run_name="BF16-FChunk-XFormers-Compile-Fuse-Quantize",
     config=config,
     save_file=True,
 )
