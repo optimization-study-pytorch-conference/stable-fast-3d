@@ -22,15 +22,15 @@ torch._inductor.config.coordinate_descent_tuning = True
 torch._inductor.config.epilogue_fusion = False
 torch._inductor.config.coordinate_descent_check_all_directions = True
 
-# Fuse-QKV
-models_dict["t2i_model"].fuse_qkv_projections()
+# # Fuse-QKV
+# models_dict["t2i_model"].fuse_qkv_projections()
 
 # Quantize
 models_dict["t2i_model"].transformer = quantize_(
     models_dict["t2i_model"].transformer, int8_weight_only(), device="cuda"
 )
-models_dict["t2i_model"].vae.decode = quantize_(
-    models_dict["t2i_model"].vae.decode, int8_weight_only(), device="cuda"
+models_dict["t2i_model"].vae = quantize_(
+    models_dict["t2i_model"].vae, int8_weight_only(), device="cuda"
 )
 models_dict["i_3d_model"] = quantize_(
     models_dict["i_3d_model"], int8_weight_only(), device="cuda"

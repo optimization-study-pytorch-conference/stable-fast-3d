@@ -33,8 +33,8 @@ models_dict["t2i_model"].transformer = quantize_(
     models_dict["t2i_model"].transformer,
     float8_dynamic_activation_float8_weight(granularity=PerRow()),
 )
-models_dict["t2i_model"].vae.decode = quantize_(
-    models_dict["t2i_model"].vae.decode,
+models_dict["t2i_model"].vae = quantize_(
+    models_dict["t2i_model"].vae,
     float8_dynamic_activation_float8_weight(granularity=PerRow()),
 )
 models_dict["i_3d_model"] = quantize_(
@@ -52,9 +52,9 @@ models_dict["t2i_model"].transformer = sparsify_(
     ),
     int8_dynamic_activation_int8_semi_sparse_weight(),
 )
-models_dict["t2i_model"].vae.decode = sparsify_(
+models_dict["t2i_model"].vae = sparsify_(
     torch.compile(
-        models_dict["t2i_model"].vae.decode, mode="max-autotune", backend="inductor", fullgraph=True
+        models_dict["t2i_model"].vae, mode="max-autotune", backend="inductor", fullgraph=True
     ),
     int8_dynamic_activation_int8_semi_sparse_weight(),
 )

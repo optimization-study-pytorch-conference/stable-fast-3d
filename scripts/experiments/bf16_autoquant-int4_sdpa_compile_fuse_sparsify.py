@@ -34,9 +34,9 @@ models_dict["t2i_model"].transformer = autoquant(
     ),
     qtensor_class_list=DEFAULT_INT4_AUTOQUANT_CLASS_LIST,
 )
-models_dict["t2i_model"].vae.decode = autoquant(
+models_dict["t2i_model"].vae = autoquant(
     torch.compile(
-        models_dict["t2i_model"].vae.decode, mode="max-autotune", backend="inductor", fullgraph=True
+        models_dict["t2i_model"].vae, mode="max-autotune", backend="inductor", fullgraph=True
     ),
     qtensor_class_list=DEFAULT_INT4_AUTOQUANT_CLASS_LIST,
 )
@@ -45,8 +45,8 @@ models_dict["i_3d_model"] = autoquant(
     qtensor_class_list=DEFAULT_INT4_AUTOQUANT_CLASS_LIST,
 )
 
-# SDPA
-models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
+# # SDPA
+# models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
 
 # Fuse QKV
 models_dict["t2i_model"].fuse_qkv_projections()
@@ -55,8 +55,8 @@ models_dict["t2i_model"].fuse_qkv_projections()
 models_dict["t2i_model"].transformer = sparsify_(
     models_dict["t2i_model"].transformer, int8_dynamic_activation_int8_semi_sparse_weight()
 )
-models_dict["t2i_model"].vae.decode = sparsify_(
-    models_dict["t2i_model"].vae.decode, int8_dynamic_activation_int8_semi_sparse_weight()
+models_dict["t2i_model"].vae = sparsify_(
+    models_dict["t2i_model"].vae, int8_dynamic_activation_int8_semi_sparse_weight()
 )
 models_dict["i_3d_model"] = sparsify_(
     models_dict["i_3d_model"], int8_dynamic_activation_int8_semi_sparse_weight()

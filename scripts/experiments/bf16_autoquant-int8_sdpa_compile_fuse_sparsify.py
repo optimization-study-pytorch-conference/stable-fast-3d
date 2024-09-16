@@ -30,18 +30,18 @@ models_dict["t2i_model"].transformer = autoquant(
         models_dict["t2i_model"].transformer, mode="max-autotune", backend="inductor", fullgraph=True
     )
 )
-models_dict["t2i_model"].vae.decode = autoquant(
-    torch.compile(models_dict["t2i_model"].vae.decode, mode="max-autotune", backend="inductor", fullgraph=True)
+models_dict["t2i_model"].vae = autoquant(
+    torch.compile(models_dict["t2i_model"].vae, mode="max-autotune", backend="inductor", fullgraph=True)
 )
 models_dict["i_3d_model"] = autoquant(
     torch.compile(models_dict["i_3d_model"], mode="max-autotune", backend="inductor", fullgraph=True)
 )
 
-# SDPA
-models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
+# # SDPA
+# models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
 
-# Fuse QKV
-models_dict["t2i_model"].fuse_qkv_projections()
+# # Fuse QKV
+# models_dict["t2i_model"].fuse_qkv_projections()
 
 # Compile and Sparsify
 models_dict["t2i_model"].transformer = sparsify_(

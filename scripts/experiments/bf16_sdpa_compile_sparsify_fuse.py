@@ -33,9 +33,9 @@ models_dict["t2i_model"].transformer = sparsify_(
     ),
     int8_dynamic_activation_int8_semi_sparse_weight(),
 )
-models_dict["t2i_model"].vae.decode = sparsify_(
+models_dict["t2i_model"].vae = sparsify_(
     torch.compile(
-        models_dict["t2i_model"].vae.decode, mode="max-autotune", backend="inductor", fullgraph=True
+        models_dict["t2i_model"].vae, mode="max-autotune", backend="inductor", fullgraph=True
     ),
     int8_dynamic_activation_int8_semi_sparse_weight(),
 )
