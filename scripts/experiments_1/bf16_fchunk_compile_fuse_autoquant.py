@@ -22,23 +22,23 @@ models_dict = init_models(config)
 models_dict["t2i_model"].transformer.enable_forward_chunking()
 models_dict["t2i_model"].transformer.fuse_qkv_projections()
 
+autoquant(
+    torch.compile(
+        models_dict["t2i_model"].transformer, mode="max-autotune", backend="inductor", fullgraph=True
+    )
+)
+autoquant(
+    torch.compile(models_dict["t2i_model"].vae, mode="max-autotune", backend="inductor", fullgraph=True)
+)
+autoquant(
+    torch.compile(models_dict["i_3d_model"].transformer, mode="max-autotune", backend="inductor", fullgraph=True)
+)
+
 model = StableT2I3D(
     t2i_model=models_dict["t2i_model"],
     i_3d_model=models_dict["i_3d_model"],
     dtype=config["dtype"],
     device=config["device"],
-)
-
-autoquant(
-    torch.compile(
-        model.t2i_pipe.transformer, mode="max-autotune", backend="inductor", fullgraph=True
-    )
-)
-autoquant(
-    torch.compile(model.t2i_pipe.vae, mode="max-autotune", backend="inductor", fullgraph=True)
-)
-autoquant(
-    torch.compile(model.i_3d_model, mode="max-autotune", backend="inductor", fullgraph=True)
 )
 
 model = warmup_model(model=model, warmup_iter=3, warmup_prompt="Warm-up model")
