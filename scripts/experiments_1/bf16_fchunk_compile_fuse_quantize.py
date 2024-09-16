@@ -22,6 +22,11 @@ activate_inductor_opts()
 
 models_dict = init_models(config)
 
+print(dir(models_dict["t2i_model"]))
+print(type(models_dict["t2i_model"]))
+print(dir(models_dict["t2i_model"].transformer))
+print(type(models_dict["t2i_model"].transformer))
+
 models_dict["t2i_model"].transformer.enable_forward_chunking()
 models_dict["t2i_model"].transformer.fuse_qkv_projections()
 
@@ -48,7 +53,12 @@ model = StableT2I3D(
     device=config["device"],
 )
 
-
+print(dir(model))
+print(type(model))
+print(dir(model.t2i_pipe))
+print(type(model.t2i_pipe))
+print(dir(model.t2i_pipe.transformer))
+print(type(model.t2i_pipe.transformer))
 
 model = warmup_model(model=model, warmup_iter=3, warmup_prompt="Warm-up model")
 
