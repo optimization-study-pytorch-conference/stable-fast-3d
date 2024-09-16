@@ -8,7 +8,6 @@ def set_random_seed(seed: int):
     np.random.seed(seed)
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.benchmark = True
     torch.use_deterministic_algorithms(True)
-    torch.set_deterministic(True)
     torch.set_printoptions(precision=5)
