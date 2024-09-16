@@ -42,7 +42,7 @@ model = warmup_model(model=model, warmup_iter=3, warmup_prompt="Warm-up model")
 benchmark_run(
     model=model,
     prompt_list=get_prompts(),
-    run_name="BF16-FChunk-XFormers-Compile",
+    run_name="BF16-FChunk-Compile",
     config=config,
     save_file=True,
 )
