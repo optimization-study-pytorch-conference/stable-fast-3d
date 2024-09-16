@@ -22,25 +22,20 @@ activate_inductor_opts()
 
 models_dict = init_models(config)
 
-print(dir(models_dict["t2i_model"]))
-print(type(models_dict["t2i_model"]))
-print(dir(models_dict["t2i_model"].transformer))
-print(type(models_dict["t2i_model"].transformer))
-
 models_dict["t2i_model"].transformer.enable_forward_chunking()
 models_dict["t2i_model"].transformer.fuse_qkv_projections()
 
-models_dict["t2i_model"].transformer = quantize_(
+quantize_(
    torch.compile(
         models_dict["t2i_model"].transformer, mode="max-autotune", backend="inductor", fullgraph=True
     ), int8_weight_only(), device="cuda"
 )
-models_dict["t2i_model"].vae = quantize_(
+quantize_(
     torch.compile(
         models_dict["t2i_model"].vae, mode="max-autotune", backend="inductor", fullgraph=True
     ), int8_weight_only(), device="cuda"
 )
-models_dict["i_3d_model"] = quantize_(
+quantize_(
     torch.compile(
         models_dict["i_3d_model"], mode="max-autotune", backend="inductor", fullgraph=True
     ), int8_weight_only(), device="cuda"
