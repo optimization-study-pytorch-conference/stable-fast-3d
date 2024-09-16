@@ -39,10 +39,7 @@ models_dict["i_3d_model"] = quantize_(
 )
 
 # Fuse-QKV
-models_dict["t2i_model"].fuse_qkv_projections()
-
-# Fuse-QKV
-models_dict["t2i_model"].fuse_qkv_projections()
+models_dict["t2i_model"].transformer.fuse_qkv_projections()
 
 # Compile and Sparsify
 models_dict["t2i_model"].transformer = sparsify_(

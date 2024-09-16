@@ -1,12 +1,13 @@
 import os
 
 import torch
+from diffusers.models.attention_processor import AttnProcessor2_0
 from huggingface_hub import login
 from models import StableT2I3D
+from utils import benchmark_run, flush, init_models, get_prompts, warmup_model, activate_inductor_opts, set_random_seed
 from torchao import autoquant
 from torchao.quantization import int8_dynamic_activation_int8_semi_sparse_weight
 from torchao.sparsity import sparsify_
-from utils import benchmark_run, flush, init_models, get_prompts, warmup_model
 
 login(token=os.getenv("HF_TOKEN_PYTORCH"))
 
@@ -16,15 +17,15 @@ config = {
 }
 
 flush()
+set_random_seed(42)
+activate_inductor_opts()
 
 models_dict = init_models(config)
 
-torch._inductor.config.conv_1x1_as_mm = True
-torch._inductor.config.coordinate_descent_tuning = True
-torch._inductor.config.epilogue_fusion = False
-torch._inductor.config.coordinate_descent_check_all_directions = True
+models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
+models_dict["t2i_model"].transformer.enable_xformers_memory_efficient_attention()
+models_dict["t2i_model"].transformer.fuse_qkv_projections()
 
-# Quantize
 models_dict["t2i_model"].transformer = autoquant(
     torch.compile(
         models_dict["t2i_model"].transformer, mode="max-autotune", backend="inductor", fullgraph=True
@@ -37,21 +38,18 @@ models_dict["i_3d_model"] = autoquant(
     torch.compile(models_dict["i_3d_model"], mode="max-autotune", backend="inductor", fullgraph=True)
 )
 
-# # SDPA
-# models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
-
-# Fuse QKV
-models_dict["t2i_model"].transformer.fuse_qkv_projections()
-
 # Compile and Sparsify
 models_dict["t2i_model"].transformer = sparsify_(
-    models_dict["t2i_model"].transformer, int8_dynamic_activation_int8_semi_sparse_weight()
+    models_dict["t2i_model"].transformer,
+    int8_dynamic_activation_int8_semi_sparse_weight(),
 )
 models_dict["t2i_model"].vae = sparsify_(
-    models_dict["t2i_model"].vae, int8_dynamic_activation_int8_semi_sparse_weight()
+    models_dict["t2i_model"].vae,
+    int8_dynamic_activation_int8_semi_sparse_weight(),
 )
 models_dict["i_3d_model"] = sparsify_(
-    models_dict["i_3d_model"], int8_dynamic_activation_int8_semi_sparse_weight()
+    models_dict["i_3d_model"],
+    int8_dynamic_activation_int8_semi_sparse_weight(),
 )
 
 model = StableT2I3D(
@@ -61,12 +59,12 @@ model = StableT2I3D(
     device=config["device"],
 )
 
-model = warmup_model(model=model, warmup_iter=10, warmup_prompt="Warm-up model")
+model = warmup_model(model=model, warmup_iter=3, warmup_prompt="Warm-up model")
 
 benchmark_run(
     model=model,
     prompt_list=get_prompts(),
-    run_name="BF16-AutoQuant-Int4-SDPA-Compile-Fuse-Sparsify",
+    run_name="BF16-SDPA",
     config=config,
     save_file=True,
 )

@@ -1,0 +1,9 @@
+python scripts/experiments_1/fp32.py
+python scripts/experiments_1/bf16.py
+python scripts/experiments_1/bf16_sdpa.py
+python scripts/experiments_1/bf16_sdpa_xformers.py
+python scripts/experiments_1/bf16_sdpa_xformers_compile.py
+python scripts/experiments_1/bf16_sdpa_xformers_compile_fuse.py
+python scripts/experiments_1/bf16_sdpa_xformers_compile_fuse_quantize.py
+python scripts/experiments_1/bf16_sdpa_xformers_compile_fuse_autoquant.py
+python scripts/experiments_1/bf16_sdpa_xformers_compile_fuse_autoquant_sparsify.py

@@ -3,7 +3,7 @@ import os
 import torch
 from huggingface_hub import login
 from models import StableT2I3D
-from utils import benchmark_run, flush, init_models, get_prompts, warmup_model
+from utils import benchmark_run, flush, init_models, get_prompts, warmup_model, activate_inductor_opts, set_random_seed
 
 login(token=os.getenv("HF_TOKEN_PYTORCH"))
 
@@ -13,10 +13,10 @@ config = {
 }
 
 flush()
+set_random_seed(42)
+activate_inductor_opts()
 
 models_dict = init_models(config)
-
-models_dict["t2i_model"].transformer.fuse_qkv_projections()
 
 model = StableT2I3D(
     t2i_model=models_dict["t2i_model"],
@@ -25,12 +25,8 @@ model = StableT2I3D(
     device=config["device"],
 )
 
-model = warmup_model(model=model, warmup_iter=10, warmup_prompt="Warm-up model")
+model = warmup_model(model=model, warmup_iter=3, warmup_prompt="Warm-up model")
 
 benchmark_run(
-    model=model,
-    prompt_list=get_prompts(),
-    run_name="BF16-FuseQKV",
-    config=config,
-    save_file=True,
+    model=model, prompt_list=get_prompts(), run_name="BF16", config=config, save_file=True
 )

@@ -17,6 +17,7 @@ flush()
 
 models_dict = init_models(config)
 
+models_dict["t2i_model"].transformer.enable_xformers_memory_efficient_attention()
 models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
 
 model = StableT2I3D(
