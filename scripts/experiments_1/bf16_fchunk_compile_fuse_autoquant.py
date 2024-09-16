@@ -19,9 +19,6 @@ activate_inductor_opts()
 
 models_dict = init_models(config)
 
-models_dict["t2i_model"].transformer.enable_forward_chunking()
-models_dict["t2i_model"].transformer.fuse_qkv_projections()
-
 model = StableT2I3D(
     t2i_model=models_dict["t2i_model"],
     i_3d_model=models_dict["i_3d_model"],
@@ -41,7 +38,8 @@ model.i_3d_model = autoquant(
     torch.compile(model.i_3d_model, mode="max-autotune", backend="inductor", fullgraph=True)
 )
 
-
+models_dict["t2i_model"].transformer.enable_forward_chunking()
+models_dict["t2i_model"].transformer.fuse_qkv_projections()
 
 model = warmup_model(model=model, warmup_iter=3, warmup_prompt="Warm-up model")
 
