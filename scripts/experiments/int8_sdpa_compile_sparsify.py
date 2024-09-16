@@ -1,7 +1,6 @@
 import os
 
 import torch
-from diffusers.models.attention_processor import AttnProcessor2_0
 from huggingface_hub import login
 from models import StableT2I3D
 from torchao.quantization import (
@@ -38,9 +37,6 @@ models_dict["t2i_model"].vae.decode = quantize_(
 models_dict["i_3d_model"] = quantize_(
     models_dict["i_3d_model"], int8_weight_only(), device="cuda"
 )
-
-# SDPA
-models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
 
 # Compile and Sparsify
 models_dict["t2i_model"].transformer = sparsify_(

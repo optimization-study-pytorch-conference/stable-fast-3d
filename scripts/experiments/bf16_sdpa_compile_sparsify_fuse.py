@@ -1,7 +1,6 @@
 import os
 
 import torch
-from diffusers.models.attention_processor import AttnProcessor2_0
 from huggingface_hub import login
 from models import StableT2I3D
 from torchao.quantization import int8_dynamic_activation_int8_semi_sparse_weight
@@ -23,9 +22,6 @@ torch._inductor.config.conv_1x1_as_mm = True
 torch._inductor.config.coordinate_descent_tuning = True
 torch._inductor.config.epilogue_fusion = False
 torch._inductor.config.coordinate_descent_check_all_directions = True
-
-# SDPA
-models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
 
 # Fuse QKV
 models_dict["t2i_model"].fuse_qkv_projections()

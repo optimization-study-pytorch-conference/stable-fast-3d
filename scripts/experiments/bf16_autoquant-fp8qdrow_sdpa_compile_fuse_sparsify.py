@@ -1,7 +1,6 @@
 import os
 
 import torch
-from diffusers.models.attention_processor import AttnProcessor2_0
 from huggingface_hub import login
 from models import StableT2I3D
 from torchao.quantization import (
@@ -42,9 +41,6 @@ models_dict["i_3d_model"] = quantize_(
     models_dict["i_3d_model"],
     float8_dynamic_activation_float8_weight(granularity=PerRow()),
 )
-
-# SDPA
-models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
 
 # Fuse QKV
 models_dict["t2i_model"].fuse_qkv_projections()

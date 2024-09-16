@@ -1,7 +1,6 @@
 import os
 
 import torch
-from diffusers.models.attention_processor import AttnProcessor2_0
 from huggingface_hub import login
 from models import StableT2I3D
 from torchao import autoquant

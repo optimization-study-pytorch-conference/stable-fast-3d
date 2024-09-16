@@ -19,8 +19,6 @@ flush()
 
 models_dict = init_models(config)
 
-models_dict["t2i_model"].transformer.set_attn_processor(AttnProcessor2_0())
-
 models_dict["t2i_model"].transformer = sparsify_(
     models_dict["t2i_model"].transformer, int8_dynamic_activation_int8_semi_sparse_weight()
 )
