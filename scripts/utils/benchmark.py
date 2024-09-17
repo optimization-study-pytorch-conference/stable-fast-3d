@@ -30,7 +30,7 @@ def benchmark_run(model, prompt_list, run_name, config, save_file=True, profile=
     if profile:
         prof = torch.profiler.profile(
             activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
-            on_trace_ready=torch.profiler.tensorboard_trace_handler('./wandb/latest-run/tbprofile'),
+            on_trace_ready=torch.profiler.tensorboard_trace_handler('./wandb/latestrun/tbprofile'),
             record_shapes=True,
             profile_memory=True,
             with_stack=True,
@@ -94,7 +94,7 @@ def benchmark_run(model, prompt_list, run_name, config, save_file=True, profile=
         print("Profiler Stopped")
 
         profile_art = wandb.Artifact(f"trace-{wandb.run.id}", type="profile")
-        profile_art.add_file(glob.glob(f"./wandb/{wandb.run.id}/tbprofile/*.pt.trace.json")[0])
+        profile_art.add_file(glob.glob(f"./wandb/latestrun/tbprofile/*.pt.trace.json")[0])
         profile_art.save()
         run.log_artifact(profile_art)
 
