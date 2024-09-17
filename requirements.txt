@@ -18,4 +18,4 @@ diffusers
 accelerate
 jaxlib==0.4.30
 ./
-torchao
+torchao==0.4.0
