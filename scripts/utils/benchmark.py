@@ -1,11 +1,12 @@
 import os
 
+import glob
 import torch
 import wandb
 from tqdm.autonotebook import tqdm
 
 
-def benchmark_run(model, prompt_list, run_name, config, save_file=True):
+def benchmark_run(model, prompt_list, run_name, config, save_file=True, benchmark=True):
     run = wandb.init(
         project="PyTorch-Conference-3D-Optimization",
         entity="suvadityamuk",
@@ -26,6 +27,18 @@ def benchmark_run(model, prompt_list, run_name, config, save_file=True):
         ]
     )
 
+    if benchmark:
+        prof = torch.profiler.profile(
+            activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
+            on_trace_ready=torch.profiler.tensorboard_trace_handler('./wandb/latest-run/tbprofile'),
+            record_shapes=True,
+            profile_memory=True,
+            with_stack=True,
+            with_flops=True,
+        )
+
+        prof.start()
+    
     for idx, prompt in tqdm(enumerate(prompt_list), total=len(prompt_list)):
 
         torch.cuda.synchronize()
@@ -74,5 +87,13 @@ def benchmark_run(model, prompt_list, run_name, config, save_file=True):
         )
 
     run.log({"result_table": result_table})
+
+    if benchmark:
+        prof.stop()
+
+    profile_art = wandb.Artifact(f"trace-{wandb.run.id}", type="profile")
+    profile_art.add_file(glob.glob("./wandb/latest-run/tbprofile/*.pt.trace.json")[0], "trace.pt.trace.json")
+    profile_art.save()
+    run.log_artifact(profile_art)
 
     run.finish()
