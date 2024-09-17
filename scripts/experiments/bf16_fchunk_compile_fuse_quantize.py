@@ -50,16 +50,6 @@ quantize_(
     int8_weight_only(),
     device="cuda",
 )
-quantize_(
-    torch.compile(
-        models_dict["i_3d_model"],
-        mode="max-autotune",
-        backend="inductor",
-        fullgraph=True,
-    ),
-    int8_weight_only(),
-    device="cuda",
-)
 
 model = StableT2I3D(
     t2i_model=models_dict["t2i_model"],
@@ -67,13 +57,6 @@ model = StableT2I3D(
     dtype=config["dtype"],
     device=config["device"],
 )
-
-print(dir(model))
-print(type(model))
-print(dir(model.t2i_pipe))
-print(type(model.t2i_pipe))
-print(dir(model.t2i_pipe.transformer))
-print(type(model.t2i_pipe.transformer))
 
 model = warmup_model(model=model, warmup_iter=3, warmup_prompt="Warm-up model")
 
