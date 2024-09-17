@@ -6,7 +6,7 @@ import wandb
 from tqdm.autonotebook import tqdm
 
 
-def benchmark_run(model, prompt_list, run_name, config, save_file=True, benchmark=True):
+def benchmark_run(model, prompt_list, run_name, config, save_file=True, profile=True):
     run = wandb.init(
         project="PyTorch-Conference-3D-Optimization",
         entity="suvadityamuk",
@@ -27,7 +27,7 @@ def benchmark_run(model, prompt_list, run_name, config, save_file=True, benchmar
         ]
     )
 
-    if benchmark:
+    if profile:
         prof = torch.profiler.profile(
             activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
             on_trace_ready=torch.profiler.tensorboard_trace_handler('./wandb/latest-run/tbprofile'),
@@ -88,12 +88,12 @@ def benchmark_run(model, prompt_list, run_name, config, save_file=True, benchmar
 
     run.log({"result_table": result_table})
 
-    if benchmark:
+    if profile:
         prof.stop()
 
-    profile_art = wandb.Artifact(f"trace-{wandb.run.id}", type="profile")
-    profile_art.add_file(glob.glob("./wandb/latest-run/tbprofile/*.pt.trace.json")[0], "trace.pt.trace.json")
-    profile_art.save()
-    run.log_artifact(profile_art)
+        profile_art = wandb.Artifact(f"trace-{wandb.run.id}", type="profile")
+        profile_art.add_file(glob.glob("./wandb/latest-run/tbprofile/*.pt.trace.json")[0], "trace.pt.trace.json")
+        profile_art.save()
+        run.log_artifact(profile_art)
 
     run.finish()
