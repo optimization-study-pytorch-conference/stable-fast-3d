@@ -94,7 +94,7 @@ def benchmark_run(model, prompt_list, run_name, config, save_file=True, profile=
         print("Profiler Stopped")
 
         profile_art = wandb.Artifact(f"trace-{wandb.run.id}", type="profile")
-        profile_art.add_file(glob.glob("./wandb/latest-run/tbprofile/trace.pt.trace.json"))
+        profile_art.add_file(glob.glob(f"./wandb/{wandb.run.id}/tbprofile/trace.pt.trace.json"))
         profile_art.save()
         run.log_artifact(profile_art)
 
