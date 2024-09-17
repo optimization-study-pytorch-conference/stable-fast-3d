@@ -1,8 +1,0 @@
-python scripts/experiments_1/fp32.py
-python scripts/experiments_1/bf16.py
-python scripts/experiments_1/bf16_fchunk.py
-python scripts/experiments_1/bf16_fchunk_compile.py
-python scripts/experiments_1/bf16_fchunk_compile_fuse.py
-python scripts/experiments_1/bf16_fchunk_compile_fuse_quantize.py
-python scripts/experiments_1/bf16_fchunk_compile_fuse_autoquant.py
-python scripts/experiments_1/bf16_fchunk_compile_fuse_autoquant_sparsify.py

@@ -3,7 +3,15 @@ import os
 import torch
 from huggingface_hub import login
 from models import StableT2I3D
-from utils import benchmark_run, flush, init_models, get_prompts, warmup_model
+from utils import (
+    activate_inductor_opts,
+    benchmark_run,
+    flush,
+    get_prompts,
+    init_models,
+    set_random_seed,
+    warmup_model,
+)
 
 login(token=os.getenv("HF_TOKEN_PYTORCH"))
 
@@ -13,6 +21,8 @@ config = {
 }
 
 flush()
+set_random_seed(42)
+activate_inductor_opts()
 
 models_dict = init_models(config)
 
@@ -23,8 +33,12 @@ model = StableT2I3D(
     device=config["device"],
 )
 
-model = warmup_model(model=model, warmup_iter=10, warmup_prompt="Warm-up model")
+model = warmup_model(model=model, warmup_iter=3, warmup_prompt="Warm-up model")
 
 benchmark_run(
-    model=model, prompt_list=get_prompts(), run_name="BF16", config=config, save_file=True
+    model=model,
+    prompt_list=get_prompts(),
+    run_name="BF16",
+    config=config,
+    save_file=True,
 )

@@ -3,10 +3,15 @@ import os
 import torch
 from huggingface_hub import login
 from models import StableT2I3D
-from utils import benchmark_run, flush, init_models, get_prompts, warmup_model, activate_inductor_opts, set_random_seed
-from torchao.quantization import (
-    int8_weight_only,
-    quantize_,
+from torchao.quantization import int8_weight_only, quantize_
+from utils import (
+    activate_inductor_opts,
+    benchmark_run,
+    flush,
+    get_prompts,
+    init_models,
+    set_random_seed,
+    warmup_model,
 )
 
 login(token=os.getenv("HF_TOKEN_PYTORCH"))
@@ -26,19 +31,34 @@ models_dict["t2i_model"].transformer.enable_forward_chunking()
 models_dict["t2i_model"].transformer.fuse_qkv_projections()
 
 quantize_(
-   torch.compile(
-        models_dict["t2i_model"].transformer, mode="max-autotune", backend="inductor", fullgraph=True
-    ), int8_weight_only(), device="cuda"
+    torch.compile(
+        models_dict["t2i_model"].transformer,
+        mode="max-autotune",
+        backend="inductor",
+        fullgraph=True,
+    ),
+    int8_weight_only(),
+    device="cuda",
 )
 quantize_(
     torch.compile(
-        models_dict["t2i_model"].vae, mode="max-autotune", backend="inductor", fullgraph=True
-    ), int8_weight_only(), device="cuda"
+        models_dict["t2i_model"].vae,
+        mode="max-autotune",
+        backend="inductor",
+        fullgraph=True,
+    ),
+    int8_weight_only(),
+    device="cuda",
 )
 quantize_(
     torch.compile(
-        models_dict["i_3d_model"], mode="max-autotune", backend="inductor", fullgraph=True
-    ), int8_weight_only(), device="cuda"
+        models_dict["i_3d_model"],
+        mode="max-autotune",
+        backend="inductor",
+        fullgraph=True,
+    ),
+    int8_weight_only(),
+    device="cuda",
 )
 
 model = StableT2I3D(

@@ -3,8 +3,17 @@ import os
 import torch
 from huggingface_hub import login
 from models import StableT2I3D
-from utils import benchmark_run, flush, init_models, get_prompts, warmup_model, activate_inductor_opts, set_random_seed
 from torchao import autoquant
+from torchao.sparsity import int8_dynamic_activation_int8_semi_sparse_weight, sparsify_
+from utils import (
+    activate_inductor_opts,
+    benchmark_run,
+    flush,
+    get_prompts,
+    init_models,
+    set_random_seed,
+    warmup_model,
+)
 
 login(token=os.getenv("HF_TOKEN_PYTORCH"))
 
@@ -24,11 +33,31 @@ models_dict["t2i_model"].transformer.fuse_qkv_projections()
 
 models_dict["t2i_model"].transformer = autoquant(
     torch.compile(
-        models_dict["t2i_model"].transformer, mode="max-autotune", backend="inductor", fullgraph=True
-    ), error_on_unseen=False
+        models_dict["t2i_model"].transformer,
+        mode="max-autotune",
+        backend="inductor",
+        fullgraph=True,
+    ),
+    error_on_unseen=False,
 )
 models_dict["t2i_model"].vae = autoquant(
-    torch.compile(models_dict["t2i_model"].vae, mode="max-autotune", backend="inductor", fullgraph=True), error_on_unseen=False
+    torch.compile(
+        models_dict["t2i_model"].vae,
+        mode="max-autotune",
+        backend="inductor",
+        fullgraph=True,
+    ),
+    error_on_unseen=False,
+)
+
+# Compile and Sparsify
+sparsify_(
+    models_dict["t2i_model"].transformer,
+    int8_dynamic_activation_int8_semi_sparse_weight(),
+)
+sparsify_(
+    models_dict["t2i_model"].vae,
+    int8_dynamic_activation_int8_semi_sparse_weight(),
 )
 
 model = StableT2I3D(
@@ -43,7 +72,7 @@ model = warmup_model(model=model, warmup_iter=3, warmup_prompt="Warm-up model")
 benchmark_run(
     model=model,
     prompt_list=get_prompts(),
-    run_name="BF16-FChunk-Compile-Fuse-AutoQuant",
+    run_name="BF16-FChunk-Compile-Fuse-AutoQuant-Sparsify",
     config=config,
     save_file=True,
 )

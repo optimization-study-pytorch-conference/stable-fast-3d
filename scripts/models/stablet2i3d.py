@@ -1,8 +1,9 @@
 import os
 
-import torch
 import rembg
+import torch
 from utils import handle_image
+
 
 class StableT2I3D(torch.nn.Module):
     def __init__(
@@ -31,7 +32,9 @@ class StableT2I3D(torch.nn.Module):
                 end_t2i = torch.cuda.Event(enable_timing=True)
 
                 start_t2i.record()
-                image = self.t2i_pipe(prompt=prompt, num_inference_steps=28, height=1024, width=1024).images[0]
+                image = self.t2i_pipe(
+                    prompt=prompt, num_inference_steps=28, height=1024, width=1024
+                ).images[0]
                 end_t2i.record()
 
                 torch.cuda.synchronize()
