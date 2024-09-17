@@ -30,9 +30,6 @@ models_dict["t2i_model"].transformer = autoquant(
 models_dict["t2i_model"].vae = autoquant(
     torch.compile(models_dict["t2i_model"].vae, mode="max-autotune", backend="inductor", fullgraph=True), error_on_unseen=False
 )
-models_dict["i_3d_model"] = autoquant(
-    torch.compile(models_dict["i_3d_model"], mode="max-autotune", backend="inductor", fullgraph=True), error_on_unseen=False
-)
 
 model = StableT2I3D(
     t2i_model=models_dict["t2i_model"],
