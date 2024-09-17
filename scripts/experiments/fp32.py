@@ -41,4 +41,5 @@ benchmark_run(
     run_name="FP32",
     config=config,
     save_file=True,
+    profile=True
 )
