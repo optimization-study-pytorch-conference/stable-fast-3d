@@ -37,6 +37,7 @@ def benchmark_run(model, prompt_list, run_name, config, save_file=True, profile=
             with_flops=True,
         )
 
+        print("Profiler Started")
         prof.start()
     
     for idx, prompt in tqdm(enumerate(prompt_list), total=len(prompt_list)):
@@ -90,9 +91,10 @@ def benchmark_run(model, prompt_list, run_name, config, save_file=True, profile=
 
     if profile:
         prof.stop()
+        print("Profiler Stopped")
 
         profile_art = wandb.Artifact(f"trace-{wandb.run.id}", type="profile")
-        profile_art.add_file(glob.glob("./wandb/latest-run/tbprofile/*.pt.trace.json")[0], "trace.pt.trace.json")
+        profile_art.add_file(glob.glob("./wandb/latest-run/tbprofile/trace.pt.trace.json"))
         profile_art.save()
         run.log_artifact(profile_art)
 
